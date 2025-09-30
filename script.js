@@ -1,78 +1,61 @@
-// 📍 Função para calcular distância usando fórmula de Haversine
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371; // raio da Terra em km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // distância em km
-}
+// 🌍 Distância (Haversine)
+const calcularDistancia = (lat1, lon1, lat2, lon2) => {
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(2);
+};
 
-// 🌍 Buscar local digitado e comparar com a posição do usuário
-document.getElementById("searchBtn").addEventListener("click", async () => {
-    const query = document.getElementById("search").value.trim();
+// 📌 Pegar localização do usuário
+const getUserLocation = () => new Promise((res, rej) =>
+  navigator.geolocation.getCurrentPosition(p => res(p.coords), rej)
+);
 
-    if (!query) {
-        alert("Digite um local para pesquisar!");
-        return;
-    }
 
-    try {
-        // 1. Pegar localização do usuário
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            const userLat = pos.coords.latitude;
-            const userLon = pos.coords.longitude;
+const getWikiInfo = async q => {
+  try {
+    const r = await fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+    if (!r.ok) return "";
+    const d = await r.json();
+    return `<h2>${d.title}</h2><p>${d.extract}</p>${d.thumbnail ? `<img src="${d.thumbnail.source}">` : ""}`;
+  } catch { return ""; }
+};
 
-            // 2. Buscar coordenadas do local via Nominatim (OpenStreetMap)
-            const geoResponse = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
-            );
-            const geoData = await geoResponse.json();
 
-            if (geoData.length === 0) {
-                document.getElementById("result").innerHTML = "<p>Local não encontrado.</p>";
-                return;
-            }
+const getPlaceCoords = async q => {
+  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`);
+  const d = await r.json();
+  return d[0] ? {lat:+d[0].lat, lon:+d[0].lon} : null;
+};
 
-            const place = geoData[0]; // pega o primeiro resultado
-            const placeLat = parseFloat(place.lat);
-            const placeLon = parseFloat(place.lon);
 
-            // 3. Calcular distância
-            const distancia = calcularDistancia(userLat, userLon, placeLat, placeLon).toFixed(2);
+document.getElementById("searchBtn").onclick = async () => {
+  const q = document.getElementById("search").value.trim();
+  if (!q) return alert("Digite um local!");
 
-            // 4. Buscar informações da Wikipédia
-            const wikiResponse = await fetch(
-                `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`
-            );
-            let wikiHTML = "";
-            if (wikiResponse.ok) {
-                const wikiData = await wikiResponse.json();
-                wikiHTML = `
-                    <h2>${wikiData.title}</h2>
-                    <p>${wikiData.extract}</p>
-                    ${wikiData.thumbnail ? `<img src="${wikiData.thumbnail.source}" alt="${wikiData.title}">` : ""}
-                `;
-            }
+  const user = await getUserLocation();
+  const place = await getPlaceCoords(q);
+  if (!place) return result.innerHTML = "<p>Local não encontrado.</p>";
 
-            // 5. Mostrar resultado completo
-            document.getElementById("result").innerHTML = `
-                <h2>📍 Informações de Localização</h2>
-                <p><b>Sua localização:</b> ${userLat}, ${userLon}</p>
-                <p><b>Local pesquisado:</b> ${placeLat}, ${placeLon}</p>
-                <p><b>Distância aproximada:</b> ${distancia} km</p>
-                <a href="https://www.google.com/maps/dir/${userLat},${userLon}/${placeLat},${placeLon}" target="_blank">
-                    Ver rota no Google Maps 🚗
-                </a>
-                <hr>
-                ${wikiHTML}
-            `;
-        });
-    } catch (err) {
-        document.getElementById("result").innerHTML = "<p>Erro na busca.</p>";
-        console.error(err);
-    }
-});
+  const dist = calcularDistancia(user.latitude, user.longitude, place.lat, place.lon);
+  const wikiHTML = await getWikiInfo(q);
+
+  result.innerHTML = `
+    <h2>📍 Informações</h2>
+    <p><b>Sua localização:</b> ${user.latitude}, ${user.longitude}</p>
+    <p><b>Local pesquisado:</b> ${place.lat}, ${place.lon}</p>
+    <p><b>Distância:</b> ${dist} km</p>
+    <a href="https://www.google.com/maps/dir/${user.latitude},${user.longitude}/${place.lat},${place.lon}" target="_blank">Ver rota 🚗</a>
+    <hr>${wikiHTML}`;
+};
+
+document.getElementById("geoBtn").onclick = async () => {
+  try {
+    const u = await getUserLocation();
+    result.innerHTML = `
+      <h2>📍 Minha Localização</h2>
+      <p><b>Latitude:</b> ${u.latitude}</p>
+      <p><b>Longitude:</b> ${u.longitude}</p>
+      <a href="https://www.google.com/maps?q=${u.latitude},${u.longitude}" target="_blank">Ver no Google Maps</a>`;
+  } catch { alert("Não foi possível obter sua localização."); }
+};
