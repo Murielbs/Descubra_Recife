@@ -1,6 +1,6 @@
 body {
   background-color: #0b0e14; 
-  color: #1f57c7;            
+  color: #a8b2c5;            
   margin: 25px;
   text-align: center;
   font-family: Arial, sans-serif;
@@ -17,7 +17,7 @@ body {
   border-radius: 25px;
   border: none;
   cursor: pointer;
-  background-color: rgb(209, 158, 30);
+  background-color: rgb(209, 197, 30);
   color: #000;
   font-weight: bold;
   margin-left: 8px;
@@ -27,7 +27,7 @@ body {
   border-radius: 25px;
   border: none;
   cursor: pointer;
-  background-color: rgb(220, 123, 54);
+  background-color: rgb(43, 158, 28);
   color: #000000;
   font-weight: bold;
   margin-left: 8px;
