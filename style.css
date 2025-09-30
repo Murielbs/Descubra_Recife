@@ -17,8 +17,18 @@ body {
   border-radius: 25px;
   border: none;
   cursor: pointer;
-  background-color: rgb(255, 217, 0);
+  background-color: rgb(209, 158, 30);
   color: #000;
+  font-weight: bold;
+  margin-left: 8px;
+}
+#search{
+  padding: 8px 14px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  background-color: rgb(220, 123, 54);
+  color: #000000;
   font-weight: bold;
   margin-left: 8px;
 }
