@@ -59,3 +59,16 @@ document.getElementById("geoBtn").onclick = async () => {
       <a href="https://www.google.com/maps?q=${u.latitude},${u.longitude}" target="_blank">Ver no Google Maps</a>`;
   } catch { alert("Não foi possível obter sua localização."); }
 };
+
+// Registrar Service Worker para PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function(reg) {
+        console.log('Service Worker registrado!', reg);
+      })
+      .catch(function(err) {
+        console.log('Service Worker falhou:', err);
+      });
+  });
+}
