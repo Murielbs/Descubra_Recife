@@ -1,4 +1,4 @@
-const CACHE_NAME = 'descubra-recife-v2'; // Versão do cache
+const CACHE_NAME = 'descubra-recife-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -10,7 +10,6 @@ const urlsToCache = [
   '/icons/icon-512.png'
 ];
 
-// Instala o Service Worker e armazena os arquivos em cache
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -37,12 +36,11 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Intercepta as requisições e responde com os arquivos do cache
+
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Retorna o arquivo do cache se encontrado, senão, busca na rede
         return response || fetch(event.request);
       })
   );
