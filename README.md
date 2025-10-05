@@ -1,5 +1,7 @@
 # ExporaBR 🌎
 
+https://bright-starlight-a33c15.netlify.app/ Acesso ao app.
+
 ExporaBR é um **Progressive Web App (PWA)** que permite ao usuário explorar lugares do Brasil de forma interativa. O app combina **geolocalização** e informações da **Wikipédia** para mostrar o local pesquisado, sua posição atual, distância entre os dois pontos e um resumo do local com imagem.  
 
 ---
